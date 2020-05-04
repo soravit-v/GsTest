@@ -7,15 +7,18 @@ using PlayFab;
 public class GameStarter : MonoBehaviour
 {
     public PlayfabLogin playfabLogin;
+    public GameObject purchasingPanel;
     void Start()
     {
         playfabLogin.gameObject.SetActive(true);
+        purchasingPanel.gameObject.SetActive(false);
         playfabLogin.InitializeCallback(OnLoginSuccess, OnLoginFail);
     }
-    public void OnLoginSuccess(LoginResult loginResult)
+    public async void OnLoginSuccess(LoginResult loginResult)
     {
-        //start game 
+        await PlayerData.OnPlayfabConnected();
         playfabLogin.gameObject.SetActive(false);
+        purchasingPanel.gameObject.SetActive(true);
     }
     public void OnLoginFail(PlayFabError onLoginFail)
     {

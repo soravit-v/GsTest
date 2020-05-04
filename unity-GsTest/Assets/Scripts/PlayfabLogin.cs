@@ -32,6 +32,7 @@ public class PlayfabLogin : MonoBehaviour
         var customId = PlayerPrefs.GetString("customId");
         if (!string.IsNullOrEmpty(customId))
         {
+            loginButton.interactable = false;
             var request = new LoginWithCustomIDRequest { CustomId = customId, CreateAccount = true };
             PlayFabClientAPI.LoginWithCustomID(request, this.onLoginSuccess, this.onLoginFail);
         }
