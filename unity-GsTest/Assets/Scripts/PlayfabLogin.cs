@@ -15,6 +15,7 @@ public class PlayfabLogin : MonoBehaviour
     private void Start()
     {
         loginButton.onClick.AddListener(Login);
+        customIdInputField.text = PlayerPrefs.GetString("customId");
     }
     public void Login()
     {
@@ -28,10 +29,19 @@ public class PlayfabLogin : MonoBehaviour
         this.onLoginSuccess += OnLoginSuccessLog;
         this.onLoginFail = onLoginFail;
         this.onLoginFail += OnLoginFailureLog;
+        var customId = PlayerPrefs.GetString("customId");
+        if (!string.IsNullOrEmpty(customId))
+        {
+            loginButton.interactable = false;
+            var request = new LoginWithCustomIDRequest { CustomId = customId, CreateAccount = true };
+            PlayFabClientAPI.LoginWithCustomID(request, this.onLoginSuccess, this.onLoginFail);
+        }
+
     }
     private void OnLoginSuccessLog(LoginResult result)
     {
-        Debug.Log("Congratulations, you made your first successful API call!");
+        PlayerPrefs.SetString("customId", customIdInputField.text);
+        Debug.Log($"Logged in with id {result.PlayFabId}");
         loginButton.interactable = false;
     }
 
