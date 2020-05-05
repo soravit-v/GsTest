@@ -18,7 +18,7 @@ public class PlayerInventory : IPlayfabData
     {
         await UpdateInventoryAsync();
     }
-    private Task UpdateInventoryAsync()
+    public Task UpdateInventoryAsync()
     {
         var task = new TaskCompletionSource<GetUserInventoryResult>();
         PlayFabClientAPI.GetUserInventory(new GetUserInventoryRequest(), GetInventorySuccess(task), GetInventoryFail);
