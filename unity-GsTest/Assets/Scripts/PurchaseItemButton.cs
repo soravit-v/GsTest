@@ -36,6 +36,6 @@ public class PurchaseItemButton : MonoBehaviour
     void UpdateText()
     {
         itemIdTextMesh.text = itemId;
-        currencyIdTextMesh.text = price + " " + currencyId;
+        currencyIdTextMesh.text = price.ToString();
     }
 }

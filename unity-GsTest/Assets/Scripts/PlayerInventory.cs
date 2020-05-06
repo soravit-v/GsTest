@@ -14,6 +14,7 @@ public class PlayerInventory : IPlayfabData
     public Dictionary<string, VirtualCurrencyRechargeTime> virtualCurrencyRechargeTimes;
     public Action<Dictionary<string, int>> onCurrencyUpdate;
     public Action<List<ItemInstance>> onItemUpdate;
+    public bool Connected { get; private set; } = false;
     public async Task OnPlayfabConnect()
     {
         await UpdateInventoryAsync();
@@ -29,11 +30,11 @@ public class PlayerInventory : IPlayfabData
     {
         return result =>
         {
-            Debug.Log("Get catalog success");
             task.SetResult(result);
             itemInstances = result.Inventory;
             virtualCurrency = result.VirtualCurrency;
             virtualCurrencyRechargeTimes = result.VirtualCurrencyRechargeTimes;
+            Connected = true;
             onItemUpdate?.Invoke(itemInstances);
             onCurrencyUpdate?.Invoke(virtualCurrency);
         };
@@ -78,6 +79,6 @@ public class PlayerInventory : IPlayfabData
     }
     public int GetCurrencyAmount(string currencyId)
     {
-        return virtualCurrency[currencyId];
+        return virtualCurrency != null ? virtualCurrency[currencyId] : 0;
     }
 }

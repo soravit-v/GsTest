@@ -13,7 +13,8 @@ public class InventoryPanel : MonoBehaviour
     {
         var inventory = PlayerData.Get<PlayerInventory>();
         buttonCollection = new Dictionary<string, InventoryItemButton>();
-        GenerateCatalogItemButton(inventory.itemInstances);
+        if (inventory.Connected)
+            GenerateCatalogItemButton(inventory.itemInstances);
         PlayerData.Get<PlayerInventory>().onItemUpdate += GenerateCatalogItemButton;
     }
     private void GenerateCatalogItemButton(List<ItemInstance> itemInstances)

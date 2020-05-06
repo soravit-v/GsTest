@@ -8,6 +8,7 @@ using UnityEngine.UI;
 
 public class PlayfabLogin : MonoBehaviour
 {
+    public GameObject panel;
     public TMP_InputField customIdInputField;
     public Button loginButton;
     private System.Action<LoginResult> onLoginSuccess;
@@ -16,6 +17,8 @@ public class PlayfabLogin : MonoBehaviour
     {
         loginButton.onClick.AddListener(Login);
         customIdInputField.text = PlayerPrefs.GetString("customId");
+        OnStateChange(GameStateManager.CurrentState); 
+        GameStateManager.onStateChange += OnStateChange;
     }
     public void Login()
     {
@@ -52,4 +55,9 @@ public class PlayfabLogin : MonoBehaviour
         Debug.LogError(error.GenerateErrorReport());
         loginButton.interactable = false;
     }
+    private void OnStateChange(GameState state)
+    {
+        panel.SetActive(state == GameState.Connecting);
+    }
+
 }
