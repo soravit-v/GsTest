@@ -3,13 +3,20 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public static class GameStateManager 
+public static class GameStateManager
 {
     public static GameState CurrentState { get; private set; } = GameState.Connecting;
     public static Action<GameState> onStateChange;
-    public static void GotoNextState()
+    public static void Next()
     {
-        CurrentState += 1;
+        if (CurrentState != GameState.ShowingResult)
+            CurrentState += 1;
+        onStateChange?.Invoke(CurrentState);
+    }
+    public static void Back()
+    {
+        if (CurrentState != GameState.Connecting)
+            CurrentState -= 1;
         onStateChange?.Invoke(CurrentState);
     }
     public static void GameEnd()

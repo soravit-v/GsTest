@@ -14,11 +14,13 @@ public class PlayfabItemCatalog : IPlayfabData
     {
         await GetCatalogAsync();
     }
-    Task<List<CatalogItem>> GetCatalogAsync()
+    public async Task<List<CatalogItem>> GetCatalogAsync()
     {
+        while (!PlayFabClientAPI.IsClientLoggedIn())
+           await Task.Delay(100);
         var task = new TaskCompletionSource<List<CatalogItem>>();
         PlayFabClientAPI.GetCatalogItems(new GetCatalogItemsRequest(), GetCatalogSuccess(task), GetCatalogFail);
-        return task.Task;
+        return await task.Task;
     }
 
     private Action<GetCatalogItemsResult> GetCatalogSuccess(TaskCompletionSource<List<CatalogItem>> task)
@@ -26,8 +28,8 @@ public class PlayfabItemCatalog : IPlayfabData
         return result =>
         {
             Debug.Log("Get catalog success");
-            task.SetResult(result.Catalog);
             itemCatalog = result.Catalog;
+            task.SetResult(result.Catalog);
         };
     }
 

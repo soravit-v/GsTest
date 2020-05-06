@@ -6,6 +6,7 @@ using UnityEngine.UI;
 public class WaitingRoomManager : MonoBehaviour
 {
     public GameObject panel;
+    public PhotonMatchMaker matchMaker;
     public Button gameMode1Button;
     public Button gameMode2Button;
     void Start()
@@ -23,11 +24,45 @@ public class WaitingRoomManager : MonoBehaviour
     #region MatchMaking
     private void FindDeathMatch()
     {
-        //photon baby
+
+        if (matchMaker.IsConnected)
+        {
+            SetButtonInteractable(false);
+            GameStateManager.Next();
+            matchMaker.JoinOrCreateRoom("DeathMatch", OnJoinSuccess, OnJoinFailed);
+            //matchMaker.JoinRandomRoom(OnJoinSuccess, OnJoinFailed);
+        }
+        else
+            Debug.Log("Waiting for photon connection");
     }
     private void FindTeamMatch()
     {
-        //photon baby
+        if (matchMaker.IsConnected)
+        {
+            SetButtonInteractable(false);
+            GameStateManager.Next();
+            //matchMaker.JoinRandomRoom(OnJoinSuccess, OnJoinFailed);
+            matchMaker.JoinOrCreateRoom("TeamMatch", OnJoinSuccess, OnJoinFailed);
+        }
+        else
+            Debug.Log("Waiting for photon connection");
+    }
+    private void OnJoinSuccess()
+    {
+        GameStateManager.Next();
+        Debug.Log("GameStateManager.GotoNextState "+ GameStateManager.CurrentState);
+    }
+    private void OnJoinFailed()
+    {
+        Debug.Log("Join failed");
+        GameStateManager.Back();
+        SetButtonInteractable(true);
+    }
+
+    private void SetButtonInteractable(bool isInteractable)
+    {
+        gameMode1Button.interactable = isInteractable;
+        gameMode2Button.interactable = isInteractable;
     }
     #endregion
 }
