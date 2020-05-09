@@ -7,10 +7,10 @@ public class ShopPanel : MonoBehaviour
 {
     public PurchaseItemButton itemButtonPrefab;
     public Transform panelParent;
-    private void Start()
+    private async void Start()
     {
-        var catalog = PlayerData.Get<PlayfabItemCatalog>();
-        GenerateCatalogItemButton(catalog.itemCatalog);
+        var catalog = await PlayerData.Get<PlayfabItemCatalog>().GetCatalogAsync();
+        GenerateCatalogItemButton(catalog);
     }
     private void GenerateCatalogItemButton(List<CatalogItem> catalog)
     {

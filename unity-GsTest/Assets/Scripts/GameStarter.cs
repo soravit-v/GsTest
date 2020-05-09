@@ -12,11 +12,11 @@ public class GameStarter : MonoBehaviour
     {
         playfabLogin.InitializeCallback(OnLoginSuccess, OnLoginFail);
     }
-    public async void OnLoginSuccess(LoginResult loginResult)
+    public async void OnLoginSuccess()
     {
         await PlayerData.OnPlayfabConnected();
         GiveStartingCurrency();
-        GameStateManager.GotoNextState();
+        GameStateManager.Next();
     }
     private void GiveStartingCurrency()
     {
