@@ -2,18 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
-public class PhotonPlayer : MonoBehaviourPun , IPunObservable
+public class PhotonPlayer : MonoBehaviourPun, IPunObservable
 {
     public new Rigidbody rigidbody;
-    private float x;
-    private float z;
+    public float moveSpeed;
+    public Vector2 rotateSpeed;
+    public Transform cameraTransform;
+    public Transform cameraPivot;
+    Vector3 direction = Vector3.zero;
+    Vector3 lookDelta = Vector3.zero;
+    Vector3 lastMousePos;
     void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
-        if (photonView.IsMine)
-        {
-
-        }
+        cameraTransform.gameObject.SetActive(photonView.IsMine);
+        lastMousePos = Input.mousePosition;
     }
 
     // Update is called once per frame
@@ -21,19 +24,26 @@ public class PhotonPlayer : MonoBehaviourPun , IPunObservable
     {
         if (photonView.IsMine)
         {
-            x = Input.GetAxisRaw("Horizontal");
-            z = Input.GetAxisRaw("Vertical");
+            direction.x = Input.GetAxisRaw("Horizontal");
+            direction.z = Input.GetAxisRaw("Vertical");
+            lookDelta.x = Input.GetAxis("Mouse X");
+            lookDelta.y = Input.GetAxis("Mouse Y");
+            lastMousePos = Input.mousePosition;
         }
     }
 
     private void FixedUpdate()
     {
-        if (photonView.IsMine)
-            rigidbody.MovePosition(rigidbody.position + new Vector3(x, 0, z));
+        if (!photonView.IsMine)
+            return;
+        var moveDirecton = transform.right * direction.x + transform.forward * direction.z;
+        transform.position = (rigidbody.position + moveDirecton * moveSpeed * Time.fixedDeltaTime);
+        transform.Rotate(Vector3.up, lookDelta.x * rotateSpeed.x * Time.fixedDeltaTime);
+        cameraPivot.Rotate(Vector3.right, lookDelta.y * rotateSpeed.y * Time.fixedDeltaTime, Space.Self);
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        throw new System.NotImplementedException();
+
     }
 }
