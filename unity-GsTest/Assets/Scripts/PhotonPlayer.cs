@@ -7,19 +7,19 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
     public new Rigidbody rigidbody;
     public float moveSpeed;
     public Vector2 rotateSpeed;
+    public float maxLookUp;
+    public float minLookUp;
+
     public Transform cameraTransform;
-    public Transform cameraPivot;
+    public Transform cameraLookAtTarget;
+    public Animator animator;
     Vector3 direction = Vector3.zero;
     Vector3 lookDelta = Vector3.zero;
-    Vector3 lastMousePos;
     void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
         cameraTransform.gameObject.SetActive(photonView.IsMine);
-        lastMousePos = Input.mousePosition;
     }
-
-    // Update is called once per frame
     void Update()
     {
         if (photonView.IsMine)
@@ -28,8 +28,23 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
             direction.z = Input.GetAxisRaw("Vertical");
             lookDelta.x = Input.GetAxis("Mouse X");
             lookDelta.y = Input.GetAxis("Mouse Y");
-            lastMousePos = Input.mousePosition;
+            if (Input.GetMouseButtonDown(1))
+            {
+                MeleeAttack();
+            }
+            else if (Input.GetMouseButtonDown(2))
+            {
+                RangeAttack();
+            }
         }
+    }
+    public void MeleeAttack()
+    {
+        animator.Play("Attack2");
+    }
+    public void RangeAttack()
+    {
+        animator.Play("Attack1");
     }
 
     private void FixedUpdate()
@@ -39,7 +54,10 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
         var moveDirecton = transform.right * direction.x + transform.forward * direction.z;
         transform.position = (rigidbody.position + moveDirecton * moveSpeed * Time.fixedDeltaTime);
         transform.Rotate(Vector3.up, lookDelta.x * rotateSpeed.x * Time.fixedDeltaTime);
-        cameraPivot.Rotate(Vector3.right, lookDelta.y * rotateSpeed.y * Time.fixedDeltaTime, Space.Self);
+        var newLookAtPosition = cameraLookAtTarget.localPosition;
+        newLookAtPosition.y += lookDelta.y * rotateSpeed.y * Time.fixedDeltaTime;
+        newLookAtPosition.y = Mathf.Clamp(newLookAtPosition.y, minLookUp, maxLookUp);
+        cameraLookAtTarget.localPosition = newLookAtPosition;
     }
 
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)

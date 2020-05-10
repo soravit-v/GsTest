@@ -6,11 +6,13 @@ using Photon.Realtime;
 
 public class PhotonMatchMaker : MonoBehaviourPunCallbacks
 {
+    public static PhotonMatchMaker Instance;
     private System.Action onJoinedSuccess;
     private System.Action onJoinedFail;
     List<Player> players;
     private void Start()
     {
+        Instance = this;
         PhotonNetwork.ConnectUsingSettings();
     }
     public bool IsConnected => PhotonNetwork.IsConnectedAndReady;
@@ -37,18 +39,19 @@ public class PhotonMatchMaker : MonoBehaviourPunCallbacks
         foreach (var player in players)
             Debug.Log("Player " + player.UserId);
         var prefabPath = "Player";
-        PhotonNetwork.Instantiate(prefabPath, Vector3.zero, Quaternion.identity);
+        var spawnPoints = FindObjectOfType<SceneSpawnPoints>();
+        PhotonNetwork.Instantiate(prefabPath, spawnPoints.GetRandomSpawnPosition(), Quaternion.identity);
         onJoinedSuccess?.Invoke();
     }
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {
         players.Add(newPlayer);
-        Debug.Log("Player " + newPlayer.UserId + " joined");
+        Debug.Log($"Player <{newPlayer.UserId}> joined");
     }
     public override void OnPlayerLeftRoom(Player otherPlayer)
     {
         players.Remove(otherPlayer);
-        Debug.Log("Player " + otherPlayer.UserId + " left");
+        Debug.Log($"Player <{otherPlayer.UserId}> left");
     }
     public void JoinOrCreateRoom(string roomName, System.Action onSuccess, System.Action onFail)
     {
