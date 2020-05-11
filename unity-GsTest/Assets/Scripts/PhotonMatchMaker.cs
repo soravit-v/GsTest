@@ -7,6 +7,7 @@ using Photon.Realtime;
 public class PhotonMatchMaker : MonoBehaviourPunCallbacks
 {
     public static PhotonMatchMaker Instance;
+    public GameObject myPlayer;
     private System.Action onJoinedSuccess;
     private System.Action onJoinedFail;
     List<Player> players;
@@ -40,7 +41,7 @@ public class PhotonMatchMaker : MonoBehaviourPunCallbacks
             Debug.Log("Player " + player.UserId);
         var prefabPath = "Player";
         var spawnPoints = FindObjectOfType<SceneSpawnPoints>();
-        PhotonNetwork.Instantiate(prefabPath, spawnPoints.GetRandomSpawnPosition(), Quaternion.identity);
+        myPlayer = PhotonNetwork.Instantiate(prefabPath, spawnPoints.GetRandomSpawnPosition(), Quaternion.identity);
         onJoinedSuccess?.Invoke();
     }
     public override void OnPlayerEnteredRoom(Player newPlayer)

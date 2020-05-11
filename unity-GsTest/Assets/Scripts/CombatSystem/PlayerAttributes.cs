@@ -28,11 +28,13 @@ public class PlayerAttributes : MonoBehaviourPun, IPunObservable, IPunInstantiat
     {
         hp = maxHp;
         mp = maxHp;
+        Debug.Log("Set hp "+ hp);
         stamina = maxStamina;
     }
-    public void TakeDamage(float damage)
+    public void TakeDamage(DamageData damageData)
     {
-        hp = Mathf.Max(0, hp - damage);
+        hp = Mathf.Max(0, hp - damageData.damage);
+        Debug.Log("Take damage has hp " + hp);
         //Die here
     }
     private void Update()
@@ -44,12 +46,12 @@ public class PlayerAttributes : MonoBehaviourPun, IPunObservable, IPunInstantiat
     private void RecoverHp(float timePassed)
     {
         hp += timePassed * hpRecoverySpeed;
-        hp = Mathf.Clamp(hp, 0, maxStamina);
+        hp = Mathf.Clamp(hp, 0, maxHp);
     }
     private void RecoverMp(float timePassed)
     {
         mp += timePassed * mpRecoverySpeed;
-        mp = Mathf.Clamp(mp, 0, maxStamina);
+        mp = Mathf.Clamp(mp, 0, maxMp);
     }
     private void RecoverStamina(float timePassed)
     {
@@ -62,7 +64,8 @@ public class PlayerAttributes : MonoBehaviourPun, IPunObservable, IPunInstantiat
 
     public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
-        if (photonView.IsMine) 
+        SetMaxValue();
+        if (photonView.IsMine)
             return;
     }
 }

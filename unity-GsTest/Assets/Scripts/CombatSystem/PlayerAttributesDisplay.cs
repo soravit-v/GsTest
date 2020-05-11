@@ -29,7 +29,7 @@ public class PlayerAttributesDisplay : MonoBehaviour
         hpFill.fillAmount = playerAttributes.HpRatio;
         mpFill.fillAmount = playerAttributes.MpRatio;
         staminaFill.fillAmount = playerAttributes.StaminaRatio;
-        FollowCharacter();
+        //FollowCharacter();
     }
     void FollowCharacter()
     {

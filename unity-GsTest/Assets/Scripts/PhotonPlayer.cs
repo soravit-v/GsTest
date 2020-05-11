@@ -15,6 +15,8 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
     public Animator animator;
     Vector3 direction = Vector3.zero;
     Vector3 lookDelta = Vector3.zero;
+
+    public Hitbox hitbox;
     void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
@@ -26,6 +28,7 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
         {
             direction.x = Input.GetAxisRaw("Horizontal");
             direction.z = Input.GetAxisRaw("Vertical");
+            direction = direction.normalized;
             lookDelta.x = Input.GetAxis("Mouse X");
             lookDelta.y = Input.GetAxis("Mouse Y");
             if (Input.GetMouseButtonDown(1))
@@ -41,6 +44,8 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
     public void MeleeAttack()
     {
         animator.Play("Attack2");
+        //get weapon hitbox
+        hitbox.SetDamageData(new DamageData() { source = photonView.Owner.UserId, damage = 10f });
     }
     public void RangeAttack()
     {
@@ -51,6 +56,7 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
     {
         if (!photonView.IsMine)
             return;
+        animator.SetFloat("walkSpeed", direction.sqrMagnitude);
         var moveDirecton = transform.right * direction.x + transform.forward * direction.z;
         transform.position = (rigidbody.position + moveDirecton * moveSpeed * Time.fixedDeltaTime);
         transform.Rotate(Vector3.up, lookDelta.x * rotateSpeed.x * Time.fixedDeltaTime);
@@ -64,4 +70,9 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
     {
 
     }
+}
+public struct DamageData
+{
+    public string source;
+    public float damage;
 }

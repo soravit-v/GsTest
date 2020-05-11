@@ -5,6 +5,7 @@ using UnityEngine;
 public class PlayingPanel : MonoBehaviour
 {
     public GameObject panel;
+    public PlayerAttributesDisplay attributesDisplay;
     void Start()
     {
         OnStateChange(GameStateManager.CurrentState);
@@ -16,6 +17,7 @@ public class PlayingPanel : MonoBehaviour
         {
             case GameState.Playing:
                 panel.SetActive(true);
+                attributesDisplay.playerAttributes = PhotonMatchMaker.Instance.myPlayer.GetComponent<PlayerAttributes>();
                 Cursor.visible = false;
                 Cursor.lockState = CursorLockMode.Locked;
                 break;
