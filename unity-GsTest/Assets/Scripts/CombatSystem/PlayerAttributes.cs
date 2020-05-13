@@ -19,23 +19,26 @@ public class PlayerAttributes : MonoBehaviourPun, IPunObservable, IPunInstantiat
     public float stamina;
     public float StaminaRatio => stamina / maxStamina;
     public float staminaRecoverySpeed;
+    private PhotonPlayer player;
 
     private void Start()
     {
+        player = GetComponent<PhotonPlayer>();
         SetMaxValue();
     }
     public void SetMaxValue()
     {
         hp = maxHp;
         mp = maxHp;
-        Debug.Log("Set hp "+ hp);
+        Debug.Log("Set hp " + hp);
         stamina = maxStamina;
     }
-    public void TakeDamage(DamageData damageData)
+    [PunRPC]
+    public void TakeDamage(float damage)
     {
-        hp = Mathf.Max(0, hp - damageData.damage);
-        Debug.Log("Take damage has hp " + hp);
-        //Die here
+        hp = Mathf.Max(0, hp - damage);
+        if (hp == 0)
+            player.photonView.RPC("Die", RpcTarget.All);
     }
     private void Update()
     {
@@ -60,12 +63,30 @@ public class PlayerAttributes : MonoBehaviourPun, IPunObservable, IPunInstantiat
     }
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
+        if (stream.IsWriting)
+        {
+            stream.SendNext(hp);
+            stream.SendNext(mp);
+            stream.SendNext(stamina);
+        }
+        else
+        {
+            hp = (float)stream.ReceiveNext();
+            mp = (float)stream.ReceiveNext();
+            stamina = (float)stream.ReceiveNext();
+        }
     }
 
     public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
         SetMaxValue();
         if (photonView.IsMine)
-            return;
+        {
+            PlayerAttributesPanel.Instance.AddMainPlayerAttribute(this, photonView.Owner);
+        }
+        else
+        {
+            PlayerAttributesPanel.Instance.AddOtherPlayerAttribute(this, photonView.Owner);
+        }
     }
 }

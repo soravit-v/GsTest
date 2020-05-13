@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using System;
+
 public class PhotonPlayer : MonoBehaviourPun, IPunObservable
 {
     public new Rigidbody rigidbody;
@@ -12,51 +14,78 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
 
     public Transform cameraTransform;
     public Transform cameraLookAtTarget;
-    public Animator animator;
+    public PhotonAnimator photonAnimator;
     Vector3 direction = Vector3.zero;
     Vector3 lookDelta = Vector3.zero;
 
-    public Hitbox hitbox;
+    public Transform bulletSpawnPoint;
+    private static Hitbox bulletPrefab;
+    private static Hitbox meleePrefab;
+    private bool isAlive = true;
     void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
+        photonAnimator = GetComponent<PhotonAnimator>();
         cameraTransform.gameObject.SetActive(photonView.IsMine);
     }
     void Update()
     {
-        if (photonView.IsMine)
+        if (photonView.IsMine && isAlive)
         {
             direction.x = Input.GetAxisRaw("Horizontal");
             direction.z = Input.GetAxisRaw("Vertical");
             direction = direction.normalized;
             lookDelta.x = Input.GetAxis("Mouse X");
             lookDelta.y = Input.GetAxis("Mouse Y");
-            if (Input.GetMouseButtonDown(1))
+            if (Input.GetMouseButtonDown(0))
             {
                 MeleeAttack();
             }
-            else if (Input.GetMouseButtonDown(2))
+            else if (Input.GetMouseButtonDown(1))
             {
                 RangeAttack();
             }
         }
     }
+    [PunRPC]
+    internal void Die()
+    {
+        isAlive = false;
+        photonAnimator.photonView.RPC("SetTrigger", RpcTarget.All, "Die");
+    }
+
     public void MeleeAttack()
     {
-        animator.Play("Attack2");
+        photonAnimator.photonView.RPC("SetTrigger", RpcTarget.All, "Attack2");
         //get weapon hitbox
-        hitbox.SetDamageData(new DamageData() { source = photonView.Owner.UserId, damage = 10f });
+        if (meleePrefab == null)
+            meleePrefab = Resources.Load<Hitbox>("Melee");
+        var hitbox = Instantiate(meleePrefab, bulletSpawnPoint.position, transform.rotation);
+        hitbox.SetDamageData(10f);
+        hitbox.SetActiveTime(0.3f, 0.2f);
+        hitbox.transform.localScale = Vector3.one;
     }
     public void RangeAttack()
     {
-        animator.Play("Attack1");
+        photonAnimator.photonView.RPC("SetTrigger", RpcTarget.All, "Attack1");
+        photonView.RPC("SpawnBullet", RpcTarget.All, bulletSpawnPoint.position, transform.forward);
+    }
+    [PunRPC]
+    public void SpawnBullet(Vector3 spawnPosition, Vector3 direction)
+    {
+        if (bulletPrefab == null)
+            bulletPrefab = Resources.Load<Hitbox>("Bullet");
+        var bullet = Instantiate(bulletPrefab, spawnPosition, transform.rotation);
+        bullet.SetDamageData(10f);
+        bullet.SetMoveDirection(3, direction);
+        bullet.transform.localScale = Vector3.one;
     }
 
     private void FixedUpdate()
     {
-        if (!photonView.IsMine)
+        if (!photonView.IsMine || !isAlive)
             return;
-        animator.SetFloat("walkSpeed", direction.sqrMagnitude);
+        SetWalkAnimation(direction.sqrMagnitude);
         var moveDirecton = transform.right * direction.x + transform.forward * direction.z;
         transform.position = (rigidbody.position + moveDirecton * moveSpeed * Time.fixedDeltaTime);
         transform.Rotate(Vector3.up, lookDelta.x * rotateSpeed.x * Time.fixedDeltaTime);
@@ -65,10 +94,25 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
         newLookAtPosition.y = Mathf.Clamp(newLookAtPosition.y, minLookUp, maxLookUp);
         cameraLookAtTarget.localPosition = newLookAtPosition;
     }
-
+    private void SetWalkAnimation(float magnitude)
+    {
+        photonAnimator.photonView.RPC("SetFloat", RpcTarget.All, "walkSpeed", magnitude);
+    }
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-
+        //if (photonView.IsMine)
+        //    return;
+        /*if (stream.IsWriting)
+        {
+            stream.SendNext(direction.x);
+            stream.SendNext(direction.z);
+        }
+        else
+        {
+            direction.x = (float)stream.ReceiveNext();
+            direction.z = (float)stream.ReceiveNext();
+            SetWalkAnimation(direction.sqrMagnitude);
+        }*/
     }
 }
 public struct DamageData

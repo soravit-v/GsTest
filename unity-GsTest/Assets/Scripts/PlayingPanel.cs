@@ -17,7 +17,7 @@ public class PlayingPanel : MonoBehaviour
         {
             case GameState.Playing:
                 panel.SetActive(true);
-                attributesDisplay.playerAttributes = PhotonMatchMaker.Instance.myPlayer.GetComponent<PlayerAttributes>();
+                attributesDisplay.Init(PhotonMatchMaker.Instance.myPlayer.GetComponent<PlayerAttributes>(), false);
                 Cursor.visible = false;
                 Cursor.lockState = CursorLockMode.Locked;
                 break;

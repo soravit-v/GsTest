@@ -6,14 +6,26 @@ using UnityEngine;
 
 public class PlayerAttributesPanel : MonoBehaviour
 {
+    public static PlayerAttributesPanel Instance { get; private set; }
     public Transform parent;
+    public PlayerAttributesDisplay mainPlayerAttributeDisplay;
     PlayerAttributesDisplay prefab;
-    public void AddPlayerAttribute(PlayerAttributes playerAttributes, Player player)
+
+    private void Awake()
+    {
+        Instance = this;
+    }
+    public void AddMainPlayerAttribute(PlayerAttributes playerAttributes, Player player)
+    {
+        mainPlayerAttributeDisplay.SetName(player.UserId);
+        mainPlayerAttributeDisplay.Init(playerAttributes, false);
+    }
+    public void AddOtherPlayerAttribute(PlayerAttributes playerAttributes, Player player)
     {
         if (prefab == null)
             prefab = Resources.Load<PlayerAttributesDisplay>("PlayerAttributesDisplay");
         var display = Instantiate(prefab, parent);
         display.SetName(player.UserId);
-        display.playerAttributes = playerAttributes;
+        display.Init(playerAttributes, true);
     }
 }

@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
-using TMPro;
 public class PlayerAttributesDisplay : MonoBehaviour
 {
-    public PlayerAttributes playerAttributes;
+    private PlayerAttributes playerAttributes;
     public RectTransform rectTransform;
     public TMP_Text nameTextMesh;
     public Image hpFill;
     public Image mpFill;
     public Image staminaFill;
-    
+    private bool followPlayer;
+
     private void Awake()
     {
     }
@@ -29,14 +29,18 @@ public class PlayerAttributesDisplay : MonoBehaviour
         hpFill.fillAmount = playerAttributes.HpRatio;
         mpFill.fillAmount = playerAttributes.MpRatio;
         staminaFill.fillAmount = playerAttributes.StaminaRatio;
-        //FollowCharacter();
+        if (followPlayer)
+            FollowCharacter();
+    }
+    public void Init(PlayerAttributes attribute, bool followPlayer)
+    {
+        this.playerAttributes = attribute;
+        this.followPlayer = followPlayer;
     }
     void FollowCharacter()
     {
-        /*var screenPoint = Camera.main.WorldToScreenPoint(playerAttributes.transform.position);
-        screenPoint.z = 0;
-        rectTransform.position = screenPoint;*/
+        var screenPoint = Camera.main.WorldToScreenPoint(playerAttributes.transform.position);
+        transform.position = screenPoint;
         //transform.position = playerAttributes.transform.position;
-        transform.LookAt(Camera.main.transform);
     }
 }
