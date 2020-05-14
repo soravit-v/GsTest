@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using System;
+using UnityEngine.UI;
 
 public class PhotonPlayer : MonoBehaviourPun, IPunObservable
 {
@@ -62,7 +63,16 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
     public void RangeAttack()
     {
         photonAnimator.photonView.RPC("SetTrigger", RpcTarget.All, "Attack1");
-        photonView.RPC("SpawnBullet", RpcTarget.All, bulletSpawnPoint.position, transform.forward);
+        SpawnBullet(bulletSpawnPoint.position, transform.forward);
+    }
+    public void SpawnBullet(Vector3 spawnPosition, Vector3 direction)
+    {
+        if (bulletPrefab == null)
+            bulletPrefab = Resources.Load<Hitbox>("Bullet");
+        var bullet = PhotonNetwork.Instantiate("Bullet", spawnPosition, transform.rotation).GetComponent<Hitbox>();
+        bullet.SetOwner(gameObject);
+        bullet.SetDamageData(10f);
+        bullet.SetMoveDirection(5, direction);
     }
     private void FixedUpdate()
     {
@@ -83,20 +93,9 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
     }
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        
+
     }
     #region RPC
-    [PunRPC]
-    public void SpawnBullet(Vector3 spawnPosition, Vector3 direction)
-    {
-        if (bulletPrefab == null)
-            bulletPrefab = Resources.Load<Hitbox>("Bullet");
-        var bullet = Instantiate(bulletPrefab, spawnPosition, transform.rotation);
-        bullet.SetOwner(gameObject);
-        bullet.SetDamageData(10f);
-        bullet.SetMoveDirection(5, direction);
-        bullet.transform.localScale = Vector3.one;
-    }
     [PunRPC]
     internal void Die()
     {

@@ -30,7 +30,6 @@ public class PlayerAttributes : MonoBehaviourPun, IPunObservable, IPunInstantiat
     {
         hp = maxHp;
         mp = maxHp;
-        Debug.Log("Set hp " + hp);
         stamina = maxStamina;
     }
     [PunRPC]

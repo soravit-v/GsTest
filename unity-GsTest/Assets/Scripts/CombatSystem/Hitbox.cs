@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using UnityEngine;
 using Photon.Pun;
-public class Hitbox : MonoBehaviour
+public class Hitbox : MonoBehaviourPun
 {
     private float damage;
     public bool disableOnHit;
@@ -18,15 +18,10 @@ public class Hitbox : MonoBehaviour
     }
     protected virtual void OnTriggerEnter(Collider other)
     {
-        if (other.gameObject == ownerObject)
+        if (other.gameObject == ownerObject || !photonView.IsMine)
             return;
-        Debug.LogError("Collision enter " + other.gameObject.name + " " + other.gameObject.GetInstanceID(), other.gameObject);
-        //todo use photon to sync damage
         if (other.gameObject.TryGetComponent(out PlayerAttributes playerAttributes))
-        {
-            Debug.LogError("Fire take damage rpc!");
             playerAttributes.photonView.RPC("TakeDamage", RpcTarget.All, damage);
-        }
         if (disableOnHit)
             collider.enabled = false;
     }
