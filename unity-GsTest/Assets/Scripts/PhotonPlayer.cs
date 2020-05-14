@@ -7,6 +7,7 @@ using System;
 public class PhotonPlayer : MonoBehaviourPun, IPunObservable
 {
     public new Rigidbody rigidbody;
+    public new Collider collider;
     public float moveSpeed;
     public Vector2 rotateSpeed;
     public float maxLookUp;
@@ -15,8 +16,8 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
     public Transform cameraTransform;
     public Transform cameraLookAtTarget;
     public PhotonAnimator photonAnimator;
-    Vector3 direction = Vector3.zero;
-    Vector3 lookDelta = Vector3.zero;
+    private Vector3 direction = Vector3.zero;
+    private Vector3 lookDelta = Vector3.zero;
 
     public Transform bulletSpawnPoint;
     private static Hitbox bulletPrefab;
@@ -25,42 +26,35 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
     void Start()
     {
         rigidbody = GetComponent<Rigidbody>();
+        collider = GetComponent<Collider>();
         photonAnimator = GetComponent<PhotonAnimator>();
         cameraTransform.gameObject.SetActive(photonView.IsMine);
     }
     void Update()
     {
-        if (photonView.IsMine && isAlive)
+        if (!photonView.IsMine || !isAlive)
+            return;
+        direction.x = Input.GetAxisRaw("Horizontal");
+        direction.z = Input.GetAxisRaw("Vertical");
+        direction = direction.normalized;
+        lookDelta.x = Input.GetAxis("Mouse X");
+        lookDelta.y = Input.GetAxis("Mouse Y");
+        if (Input.GetMouseButtonDown(0))
         {
-            direction.x = Input.GetAxisRaw("Horizontal");
-            direction.z = Input.GetAxisRaw("Vertical");
-            direction = direction.normalized;
-            lookDelta.x = Input.GetAxis("Mouse X");
-            lookDelta.y = Input.GetAxis("Mouse Y");
-            if (Input.GetMouseButtonDown(0))
-            {
-                MeleeAttack();
-            }
-            else if (Input.GetMouseButtonDown(1))
-            {
-                RangeAttack();
-            }
+            MeleeAttack();
+        }
+        else if (Input.GetMouseButtonDown(1))
+        {
+            RangeAttack();
         }
     }
-    [PunRPC]
-    internal void Die()
-    {
-        isAlive = false;
-        photonAnimator.photonView.RPC("SetTrigger", RpcTarget.All, "Die");
-    }
-
     public void MeleeAttack()
     {
         photonAnimator.photonView.RPC("SetTrigger", RpcTarget.All, "Attack2");
-        //get weapon hitbox
         if (meleePrefab == null)
             meleePrefab = Resources.Load<Hitbox>("Melee");
         var hitbox = Instantiate(meleePrefab, bulletSpawnPoint.position, transform.rotation);
+        hitbox.SetOwner(gameObject);
         hitbox.SetDamageData(10f);
         hitbox.SetActiveTime(0.3f, 0.2f);
         hitbox.transform.localScale = Vector3.one;
@@ -70,17 +64,6 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
         photonAnimator.photonView.RPC("SetTrigger", RpcTarget.All, "Attack1");
         photonView.RPC("SpawnBullet", RpcTarget.All, bulletSpawnPoint.position, transform.forward);
     }
-    [PunRPC]
-    public void SpawnBullet(Vector3 spawnPosition, Vector3 direction)
-    {
-        if (bulletPrefab == null)
-            bulletPrefab = Resources.Load<Hitbox>("Bullet");
-        var bullet = Instantiate(bulletPrefab, spawnPosition, transform.rotation);
-        bullet.SetDamageData(10f);
-        bullet.SetMoveDirection(3, direction);
-        bullet.transform.localScale = Vector3.one;
-    }
-
     private void FixedUpdate()
     {
         if (!photonView.IsMine || !isAlive)
@@ -100,23 +83,27 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
     }
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
-        //if (photonView.IsMine)
-        //    return;
-        /*if (stream.IsWriting)
-        {
-            stream.SendNext(direction.x);
-            stream.SendNext(direction.z);
-        }
-        else
-        {
-            direction.x = (float)stream.ReceiveNext();
-            direction.z = (float)stream.ReceiveNext();
-            SetWalkAnimation(direction.sqrMagnitude);
-        }*/
+        
     }
-}
-public struct DamageData
-{
-    public string source;
-    public float damage;
+    #region RPC
+    [PunRPC]
+    public void SpawnBullet(Vector3 spawnPosition, Vector3 direction)
+    {
+        if (bulletPrefab == null)
+            bulletPrefab = Resources.Load<Hitbox>("Bullet");
+        var bullet = Instantiate(bulletPrefab, spawnPosition, transform.rotation);
+        bullet.SetOwner(gameObject);
+        bullet.SetDamageData(10f);
+        bullet.SetMoveDirection(5, direction);
+        bullet.transform.localScale = Vector3.one;
+    }
+    [PunRPC]
+    internal void Die()
+    {
+        isAlive = false;
+        rigidbody.isKinematic = true;
+        collider.enabled = false;
+        photonAnimator.photonView.RPC("SetTrigger", RpcTarget.All, "Die");
+    }
+    #endregion
 }

@@ -11,19 +11,30 @@ public class Hitbox : MonoBehaviour
     private Vector3 moveDirection;
     private float moveSpeed;
     private new Collider collider;
+    private GameObject ownerObject;
     private void Awake()
     {
         collider = GetComponent<Collider>();
     }
     protected virtual void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Collision enter " + other.gameObject.name + " " + other.gameObject.GetInstanceID());
+        if (other.gameObject == ownerObject)
+            return;
+        Debug.LogError("Collision enter " + other.gameObject.name + " " + other.gameObject.GetInstanceID(), other.gameObject);
         //todo use photon to sync damage
         if (other.gameObject.TryGetComponent(out PlayerAttributes playerAttributes))
-            playerAttributes.photonView.RPC("TakeDamage", RpcTarget.MasterClient, damage);
+        {
+            Debug.LogError("Fire take damage rpc!");
+            playerAttributes.photonView.RPC("TakeDamage", RpcTarget.All, damage);
+        }
         if (disableOnHit)
             collider.enabled = false;
     }
+    public void SetOwner(GameObject ownerObject)
+    {
+        this.ownerObject = ownerObject;
+    }
+
     public void SetActiveTime(float spawnDelay, float lifeTime)
     {
         StartCoroutine(SetActiveTimeCoroutine(spawnDelay, lifeTime));

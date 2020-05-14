@@ -301,6 +301,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rigidbody: {fileID: 0}
+  collider: {fileID: 0}
   moveSpeed: 3
   rotateSpeed: {x: 80, y: 15}
   maxLookUp: 2

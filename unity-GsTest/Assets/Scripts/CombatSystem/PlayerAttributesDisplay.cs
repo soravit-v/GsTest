@@ -8,6 +8,9 @@ public class PlayerAttributesDisplay : MonoBehaviour
     private PlayerAttributes playerAttributes;
     public RectTransform rectTransform;
     public TMP_Text nameTextMesh;
+    public TMP_Text hpTextMesh;
+    public TMP_Text mpTextMesh;
+    public TMP_Text staminaTextMesh;
     public Image hpFill;
     public Image mpFill;
     public Image staminaFill;
@@ -27,8 +30,14 @@ public class PlayerAttributesDisplay : MonoBehaviour
         if (playerAttributes == null)
             return;
         hpFill.fillAmount = playerAttributes.HpRatio;
+        if (hpTextMesh != null)
+            hpTextMesh.text = $"{playerAttributes.hp}/{playerAttributes.maxHp}";
         mpFill.fillAmount = playerAttributes.MpRatio;
+        if (mpTextMesh != null)
+            mpTextMesh.text = $"{playerAttributes.mp}/{playerAttributes.maxMp}";
         staminaFill.fillAmount = playerAttributes.StaminaRatio;
+        if (staminaTextMesh != null)
+            staminaTextMesh.text = $"{playerAttributes.stamina}/{playerAttributes.maxStamina}";
         if (followPlayer)
             FollowCharacter();
     }
