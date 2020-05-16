@@ -39,6 +39,18 @@ public class PlayerAttributes : MonoBehaviourPun, IPunObservable, IPunInstantiat
         if (hp == 0)
             player.photonView.RPC("Die", RpcTarget.All);
     }
+    public bool TryConsumeStamina(float amount)
+    {
+        if (stamina >= amount)
+        {
+            stamina -= amount;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     private void Update()
     {
         RecoverHp(Time.deltaTime);

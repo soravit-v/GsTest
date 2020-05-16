@@ -17,6 +17,7 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
     public Transform cameraTransform;
     public Transform cameraLookAtTarget;
     public PhotonAnimator photonAnimator;
+    public PlayerAttributes playerAttributes;
     private Vector3 direction = Vector3.zero;
     private Vector3 lookDelta = Vector3.zero;
 
@@ -29,6 +30,7 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
         rigidbody = GetComponent<Rigidbody>();
         collider = GetComponent<Collider>();
         photonAnimator = GetComponent<PhotonAnimator>();
+        playerAttributes = GetComponent<PlayerAttributes>();
         cameraTransform.gameObject.SetActive(photonView.IsMine);
     }
     void Update()
@@ -51,28 +53,31 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
     }
     public void MeleeAttack()
     {
-        photonAnimator.photonView.RPC("SetTrigger", RpcTarget.All, "Attack2");
-        if (meleePrefab == null)
-            meleePrefab = Resources.Load<Hitbox>("Melee");
-        var hitbox = Instantiate(meleePrefab, bulletSpawnPoint.position, transform.rotation);
-        hitbox.SetOwner(gameObject);
-        hitbox.SetDamageData(10f);
-        hitbox.SetActiveTime(0.3f, 0.2f);
-        hitbox.transform.localScale = Vector3.one;
+        if (playerAttributes.TryConsumeStamina(20f))
+        {
+            photonAnimator.photonView.RPC("SetTrigger", RpcTarget.All, "Attack2");
+            var hitbox = PhotonNetwork.Instantiate("Melee", bulletSpawnPoint.position, transform.rotation).GetComponent<Hitbox>();
+            hitbox.SetOwner(gameObject);
+            hitbox.SetDamageData(20f);
+            hitbox.SetActiveTime(0.3f, 0.2f);
+            hitbox.transform.localScale = Vector3.one;
+        }
     }
     public void RangeAttack()
     {
-        photonAnimator.photonView.RPC("SetTrigger", RpcTarget.All, "Attack1");
-        SpawnBullet(bulletSpawnPoint.position, transform.forward);
+        if (playerAttributes.TryConsumeStamina(5f))
+        {
+            photonAnimator.photonView.RPC("SetTrigger", RpcTarget.All, "Attack1");
+            SpawnBullet(bulletSpawnPoint.position, transform.forward, 5f);
+        }
     }
-    public void SpawnBullet(Vector3 spawnPosition, Vector3 direction)
+    public void SpawnBullet(Vector3 spawnPosition, Vector3 direction, float bulletDamage)
     {
-        if (bulletPrefab == null)
-            bulletPrefab = Resources.Load<Hitbox>("Bullet");
         var bullet = PhotonNetwork.Instantiate("Bullet", spawnPosition, transform.rotation).GetComponent<Hitbox>();
         bullet.SetOwner(gameObject);
-        bullet.SetDamageData(10f);
+        bullet.SetDamageData(bulletDamage);
         bullet.SetMoveDirection(5, direction);
+        bullet.SetActiveTime(0.3f, 10f);
     }
     private void FixedUpdate()
     {

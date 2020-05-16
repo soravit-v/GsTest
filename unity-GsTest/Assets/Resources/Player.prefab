@@ -309,6 +309,7 @@ MonoBehaviour:
   cameraTransform: {fileID: 444604115811401892}
   cameraLookAtTarget: {fileID: 7111390354414363095}
   photonAnimator: {fileID: 0}
+  playerAttributes: {fileID: 0}
   bulletSpawnPoint: {fileID: 1055841901719406931}
 --- !u!114 &4184871732036227043
 MonoBehaviour:
