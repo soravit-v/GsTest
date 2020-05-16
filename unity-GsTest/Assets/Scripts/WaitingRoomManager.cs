@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using PlayFab.ClientModels;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +10,7 @@ public class WaitingRoomManager : MonoBehaviour
     public PhotonMatchMaker matchMaker;
     public Button gameMode1Button;
     public Button gameMode2Button;
+    public EquippedInventory equippedInventory;
     void Start()
     {
         OnStateChange(GameStateManager.CurrentState);
@@ -16,7 +18,6 @@ public class WaitingRoomManager : MonoBehaviour
         gameMode1Button.onClick.AddListener(FindDeathMatch);
         gameMode2Button.onClick.AddListener(FindTeamMatch);
     }
-
     private void OnStateChange(GameState state)
     {
         panel.SetActive(state == GameState.Waiting || state == GameState.FindingMatch);
@@ -30,7 +31,6 @@ public class WaitingRoomManager : MonoBehaviour
             SetButtonInteractable(false);
             GameStateManager.Next();
             matchMaker.JoinOrCreateRoom("DeathMatch", OnJoinSuccess, OnJoinFailed);
-            //matchMaker.JoinRandomRoom(OnJoinSuccess, OnJoinFailed);
         }
         else
             Debug.Log("Waiting for photon connection");
@@ -41,7 +41,6 @@ public class WaitingRoomManager : MonoBehaviour
         {
             SetButtonInteractable(false);
             GameStateManager.Next();
-            //matchMaker.JoinRandomRoom(OnJoinSuccess, OnJoinFailed);
             matchMaker.JoinOrCreateRoom("TeamMatch", OnJoinSuccess, OnJoinFailed);
         }
         else
@@ -50,7 +49,7 @@ public class WaitingRoomManager : MonoBehaviour
     private void OnJoinSuccess()
     {
         GameStateManager.Next();
-        Debug.Log("GameStateManager.GotoNextState "+ GameStateManager.CurrentState);
+        Debug.Log("GameStateManager.GotoNextState " + GameStateManager.CurrentState);
     }
     private void OnJoinFailed()
     {
@@ -65,4 +64,9 @@ public class WaitingRoomManager : MonoBehaviour
         gameMode2Button.interactable = isInteractable;
     }
     #endregion
+}
+public class EquippedInventory
+{
+    public ItemInstance meleeWeapon;
+    public ItemInstance rangeWeapon;
 }

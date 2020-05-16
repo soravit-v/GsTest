@@ -8,16 +8,16 @@ public class PurchaseItemButton : MonoBehaviour
     public TMP_Text itemIdTextMesh;
     public TMP_Text currencyIdTextMesh;
     public Button button;
-    public string itemId;
+    public CatalogItem catalogItem;
     public string currencyId;
     public int price;
 
-    public void Initialize(string itemId, string currencyId)
+    public void Initialize(CatalogItem catalogItem, string currencyId)
     {
-        this.itemId = itemId;
+        this.catalogItem = catalogItem;
         this.currencyId = currencyId;
-        var catalogData = PlayerData.Get<PlayfabItemCatalog>().GetCatalogItemData(itemId);
-        price = (int)catalogData.VirtualCurrencyPrices[currencyId];
+        //var catalogData = PlayerData.Get<PlayfabItemCatalog>().GetCatalogItemData(itemId);
+        price = (int)catalogItem.VirtualCurrencyPrices[currencyId];
         UpdateText();
         button.onClick.RemoveAllListeners();
         button.onClick.AddListener(PurchaseItem);
@@ -26,7 +26,7 @@ public class PurchaseItemButton : MonoBehaviour
     {
         var request = new PurchaseItemRequest()
         {
-            ItemId = itemId,
+            ItemId = catalogItem.ItemId,
             VirtualCurrency = currencyId,
             Price = price,
             CatalogVersion = "0.0.1",
@@ -35,7 +35,7 @@ public class PurchaseItemButton : MonoBehaviour
     }
     void UpdateText()
     {
-        itemIdTextMesh.text = itemId;
+        itemIdTextMesh.text = catalogItem.DisplayName;
         currencyIdTextMesh.text = price.ToString();
     }
 }

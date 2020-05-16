@@ -18,7 +18,7 @@ public class ShopPanel : MonoBehaviour
         for (int i = 0; i < catalog.Count; i++)
         {
             var button = Instantiate(itemButtonPrefab, panelParent);
-            button.Initialize(catalog[i].ItemId, "CO");
+            button.Initialize(catalog[i], "CO");
             button.gameObject.SetActive(true);
         }
     }

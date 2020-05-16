@@ -29,7 +29,7 @@ public class InventoryPanel : MonoBehaviour
             else
             {
                 var button = Instantiate(itemButtonPrefab, panelParent);
-                button.Initialize(item.ItemId);
+                button.Initialize(item);
                 button.gameObject.SetActive(true);
                 buttonCollection.Add(item.ItemId, button);
             }
