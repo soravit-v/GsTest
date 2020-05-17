@@ -22,6 +22,8 @@ public class WaitingRoomManager : MonoBehaviour
     private void OnStateChange(GameState state)
     {
         panel.SetActive(state == GameState.Waiting || state == GameState.FindingMatch);
+        if (state == GameState.Waiting)
+            SetButtonInteractable(true);
     }
     private bool IsReadyToFindMatch(out string errorMessage)
     {
@@ -41,7 +43,7 @@ public class WaitingRoomManager : MonoBehaviour
     #region MatchMaking
     private void FindDeathMatch()
     {
-        if (matchMaker.IsConnected && false)
+        if (matchMaker.IsConnected)
         {
             if (IsReadyToFindMatch(out string error))
             {
@@ -72,7 +74,6 @@ public class WaitingRoomManager : MonoBehaviour
         var player = PhotonMatchMaker.Instance.myPlayer.GetComponent<PhotonPlayer>();
         player.SetEquipment(inventory.MeleeWeapon, inventory.RangeWeapon);
         GameStateManager.Next();
-        Debug.Log("GameStateManager.GotoNextState " + GameStateManager.CurrentState);
     }
     private void OnJoinFailed()
     {

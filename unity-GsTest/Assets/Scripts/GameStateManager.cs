@@ -11,6 +11,7 @@ public static class GameStateManager
     {
         if (CurrentState != GameState.ShowingResult)
             CurrentState += 1;
+        Debug.Log($"Goto next state {CurrentState}");
         onStateChange?.Invoke(CurrentState);
     }
     public static void Back()
