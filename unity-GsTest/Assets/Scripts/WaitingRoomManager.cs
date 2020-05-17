@@ -11,6 +11,7 @@ public class WaitingRoomManager : MonoBehaviour
     public Button gameMode1Button;
     public Button gameMode2Button;
     public EquippedInventory equippedInventory;
+    public AlertPopup popup;
     void Start()
     {
         OnStateChange(GameStateManager.CurrentState);
@@ -22,18 +23,37 @@ public class WaitingRoomManager : MonoBehaviour
     {
         panel.SetActive(state == GameState.Waiting || state == GameState.FindingMatch);
     }
+    private bool IsReadyToFindMatch(out string errorMessage)
+    {
+        errorMessage = "";
+        var inventory = PlayerData.Get<PlayerInventory>();
+        if (inventory.MeleeWeapon == null || inventory.RangeWeapon == null)
+        {
+            errorMessage = "Weapon is not equipped";
+            return false;
+        }
+        return true;
+    }
+    public void ShowPopup(string message)
+    {
+        popup.ShowPopup(message);
+    }
     #region MatchMaking
     private void FindDeathMatch()
     {
-
-        if (matchMaker.IsConnected)
+        if (matchMaker.IsConnected && false)
         {
-            SetButtonInteractable(false);
-            GameStateManager.Next();
-            matchMaker.JoinOrCreateRoom("DeathMatch", OnJoinSuccess, OnJoinFailed);
+            if (IsReadyToFindMatch(out string error))
+            {
+                SetButtonInteractable(false);
+                GameStateManager.Next();
+                matchMaker.JoinOrCreateRoom("DeathMatch", OnJoinSuccess, OnJoinFailed);
+            }
+            else
+                ShowPopup(error);
         }
         else
-            Debug.Log("Waiting for photon connection");
+            ShowPopup("Waiting for photon connection");
     }
     private void FindTeamMatch()
     {
@@ -44,7 +64,7 @@ public class WaitingRoomManager : MonoBehaviour
             matchMaker.JoinOrCreateRoom("TeamMatch", OnJoinSuccess, OnJoinFailed);
         }
         else
-            Debug.Log("Waiting for photon connection");
+            ShowPopup("Waiting for photon connection");
     }
     private void OnJoinSuccess()
     {
