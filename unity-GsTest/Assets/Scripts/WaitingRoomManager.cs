@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using PlayFab.ClientModels;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -9,6 +10,8 @@ public class WaitingRoomManager : MonoBehaviour
     public PhotonMatchMaker matchMaker;
     public Button gameMode1Button;
     public Button gameMode2Button;
+    public EquippedInventory equippedInventory;
+    public AlertPopup popup;
     void Start()
     {
         OnStateChange(GameStateManager.CurrentState);
@@ -16,24 +19,41 @@ public class WaitingRoomManager : MonoBehaviour
         gameMode1Button.onClick.AddListener(FindDeathMatch);
         gameMode2Button.onClick.AddListener(FindTeamMatch);
     }
-
     private void OnStateChange(GameState state)
     {
         panel.SetActive(state == GameState.Waiting || state == GameState.FindingMatch);
     }
+    private bool IsReadyToFindMatch(out string errorMessage)
+    {
+        errorMessage = "";
+        var inventory = PlayerData.Get<PlayerInventory>();
+        if (inventory.MeleeWeapon == null || inventory.RangeWeapon == null)
+        {
+            errorMessage = "Weapon is not equipped";
+            return false;
+        }
+        return true;
+    }
+    public void ShowPopup(string message)
+    {
+        popup.ShowPopup(message);
+    }
     #region MatchMaking
     private void FindDeathMatch()
     {
-
-        if (matchMaker.IsConnected)
+        if (matchMaker.IsConnected && false)
         {
-            SetButtonInteractable(false);
-            GameStateManager.Next();
-            matchMaker.JoinOrCreateRoom("DeathMatch", OnJoinSuccess, OnJoinFailed);
-            //matchMaker.JoinRandomRoom(OnJoinSuccess, OnJoinFailed);
+            if (IsReadyToFindMatch(out string error))
+            {
+                SetButtonInteractable(false);
+                GameStateManager.Next();
+                matchMaker.JoinOrCreateRoom("DeathMatch", OnJoinSuccess, OnJoinFailed);
+            }
+            else
+                ShowPopup(error);
         }
         else
-            Debug.Log("Waiting for photon connection");
+            ShowPopup("Waiting for photon connection");
     }
     private void FindTeamMatch()
     {
@@ -41,16 +61,18 @@ public class WaitingRoomManager : MonoBehaviour
         {
             SetButtonInteractable(false);
             GameStateManager.Next();
-            //matchMaker.JoinRandomRoom(OnJoinSuccess, OnJoinFailed);
             matchMaker.JoinOrCreateRoom("TeamMatch", OnJoinSuccess, OnJoinFailed);
         }
         else
-            Debug.Log("Waiting for photon connection");
+            ShowPopup("Waiting for photon connection");
     }
     private void OnJoinSuccess()
     {
+        var inventory = PlayerData.Get<PlayerInventory>();
+        var player = PhotonMatchMaker.Instance.myPlayer.GetComponent<PhotonPlayer>();
+        player.SetEquipment(inventory.MeleeWeapon, inventory.RangeWeapon);
         GameStateManager.Next();
-        Debug.Log("GameStateManager.GotoNextState "+ GameStateManager.CurrentState);
+        Debug.Log("GameStateManager.GotoNextState " + GameStateManager.CurrentState);
     }
     private void OnJoinFailed()
     {
@@ -65,4 +87,9 @@ public class WaitingRoomManager : MonoBehaviour
         gameMode2Button.interactable = isInteractable;
     }
     #endregion
+}
+public class EquippedInventory
+{
+    public ItemInstance meleeWeapon;
+    public ItemInstance rangeWeapon;
 }
