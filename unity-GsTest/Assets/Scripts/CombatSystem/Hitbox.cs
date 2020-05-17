@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Security.Cryptography;
+﻿using System.Collections;
 using UnityEngine;
 using Photon.Pun;
 public class Hitbox : MonoBehaviourPun
@@ -53,6 +50,7 @@ public class Hitbox : MonoBehaviourPun
     }
     private void Update()
     {
-        transform.Translate(moveDirection * moveSpeed * Time.deltaTime, Space.World);
+        if (moveSpeed > 0)
+            transform.Translate(moveDirection * moveSpeed * Time.deltaTime, Space.World);
     }
 }

@@ -48,6 +48,9 @@ public class WaitingRoomManager : MonoBehaviour
     }
     private void OnJoinSuccess()
     {
+        var inventory = PlayerData.Get<PlayerInventory>();
+        var player = PhotonMatchMaker.Instance.myPlayer.GetComponent<PhotonPlayer>();
+        player.SetEquipment(inventory.MeleeWeapon, inventory.RangeWeapon);
         GameStateManager.Next();
         Debug.Log("GameStateManager.GotoNextState " + GameStateManager.CurrentState);
     }

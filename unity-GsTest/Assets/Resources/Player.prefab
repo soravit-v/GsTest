@@ -328,7 +328,7 @@ MonoBehaviour:
   hpRecoverySpeed: 0
   maxMp: 50
   mp: 0
-  mpRecoverySpeed: 0
+  mpRecoverySpeed: 1
   maxStamina: 30
   stamina: 0
   staminaRecoverySpeed: 5

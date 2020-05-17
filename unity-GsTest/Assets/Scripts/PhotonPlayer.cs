@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using System;
 using UnityEngine.UI;
+using PlayFab.ClientModels;
 
 public class PhotonPlayer : MonoBehaviourPun, IPunObservable
 {
@@ -22,8 +23,8 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
     private Vector3 lookDelta = Vector3.zero;
 
     public Transform bulletSpawnPoint;
-    private static Hitbox bulletPrefab;
-    private static Hitbox meleePrefab;
+    private WeaponData meleeData;
+    private WeaponData rangeData;
     private bool isAlive = true;
     void Start()
     {
@@ -53,31 +54,28 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
     }
     public void MeleeAttack()
     {
-        if (playerAttributes.TryConsumeStamina(20f))
+        if (playerAttributes.TryConsumeStamina(meleeData.stamina))
         {
             photonAnimator.photonView.RPC("SetTrigger", RpcTarget.All, "Attack2");
             var hitbox = PhotonNetwork.Instantiate("Melee", bulletSpawnPoint.position, transform.rotation).GetComponent<Hitbox>();
             hitbox.SetOwner(gameObject);
-            hitbox.SetDamageData(20f);
+            hitbox.SetDamageData(meleeData.damage);
             hitbox.SetActiveTime(0.3f, 0.2f);
             hitbox.transform.localScale = Vector3.one;
         }
     }
     public void RangeAttack()
     {
-        if (playerAttributes.TryConsumeStamina(5f))
+        if (playerAttributes.TryConsumeMana(rangeData.mana))
         {
             photonAnimator.photonView.RPC("SetTrigger", RpcTarget.All, "Attack1");
-            SpawnBullet(bulletSpawnPoint.position, transform.forward, 5f);
+            var bullet = PhotonNetwork.Instantiate("Bullet", bulletSpawnPoint.position, transform.rotation).GetComponent<Hitbox>();
+            bullet.SetOwner(gameObject);
+            bullet.SetDamageData(rangeData.damage);
+            bullet.SetMoveDirection(rangeData.speed, transform.forward);
+            bullet.SetActiveTime(0.3f, 10f);
+            bullet.transform.localScale = Vector3.one * rangeData.size;
         }
-    }
-    public void SpawnBullet(Vector3 spawnPosition, Vector3 direction, float bulletDamage)
-    {
-        var bullet = PhotonNetwork.Instantiate("Bullet", spawnPosition, transform.rotation).GetComponent<Hitbox>();
-        bullet.SetOwner(gameObject);
-        bullet.SetDamageData(bulletDamage);
-        bullet.SetMoveDirection(5, direction);
-        bullet.SetActiveTime(0.3f, 10f);
     }
     private void FixedUpdate()
     {
@@ -96,6 +94,12 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
     {
         photonAnimator.photonView.RPC("SetFloat", RpcTarget.All, "walkSpeed", magnitude);
     }
+    public void SetEquipment(ItemInstance meleeWeapon, ItemInstance rangeWeapon)
+    {
+        meleeData = new WeaponData(meleeWeapon);
+        rangeData = new WeaponData(rangeWeapon);
+    }
+
     public void OnPhotonSerializeView(PhotonStream stream, PhotonMessageInfo info)
     {
 

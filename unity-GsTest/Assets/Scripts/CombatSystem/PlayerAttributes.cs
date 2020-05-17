@@ -1,4 +1,6 @@
 ﻿using Photon.Pun;
+using PlayFab.ClientModels;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -51,6 +53,18 @@ public class PlayerAttributes : MonoBehaviourPun, IPunObservable, IPunInstantiat
             return false;
         }
     }
+    public bool TryConsumeMana(float amount)
+    {
+        if (mp >= amount)
+        {
+            mp -= amount;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
     private void Update()
     {
         RecoverHp(Time.deltaTime);
@@ -67,6 +81,7 @@ public class PlayerAttributes : MonoBehaviourPun, IPunObservable, IPunInstantiat
         mp += timePassed * mpRecoverySpeed;
         mp = Mathf.Clamp(mp, 0, maxMp);
     }
+
     private void RecoverStamina(float timePassed)
     {
         stamina += timePassed * staminaRecoverySpeed;
