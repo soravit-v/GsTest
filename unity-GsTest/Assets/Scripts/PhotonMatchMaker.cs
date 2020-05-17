@@ -72,7 +72,7 @@ public class PhotonMatchMaker : MonoBehaviourPunCallbacks
     {
         switch (state)
         {
-            case GameState.Waiting:
+            case GameState.Preparing:
                 LeaveRoom();
                 break;
         }

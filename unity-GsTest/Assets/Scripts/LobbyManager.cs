@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class WaitingRoomManager : MonoBehaviour
+public class LobbyManager : MonoBehaviour
 {
     public GameObject panel;
     public PhotonMatchMaker matchMaker;
@@ -21,8 +21,8 @@ public class WaitingRoomManager : MonoBehaviour
     }
     private void OnStateChange(GameState state)
     {
-        panel.SetActive(state == GameState.Waiting || state == GameState.FindingMatch);
-        if (state == GameState.Waiting)
+        panel.SetActive(state == GameState.Preparing || state == GameState.FindingMatch);
+        if (state == GameState.Preparing)
             SetButtonInteractable(true);
     }
     private bool IsReadyToFindMatch(out string errorMessage)

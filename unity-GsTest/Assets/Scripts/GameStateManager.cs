@@ -22,14 +22,14 @@ public static class GameStateManager
     }
     public static void GameEnd()
     {
-        CurrentState = GameState.Waiting;
+        CurrentState = GameState.Preparing;
         onStateChange?.Invoke(CurrentState);
     }
 }
 public enum GameState
 {
     Connecting,
-    Waiting,
+    Preparing,
     FindingMatch,
     Playing,
     ShowingResult,
