@@ -11,6 +11,7 @@ public static class GameStateManager
     {
         if (CurrentState != GameState.ShowingResult)
             CurrentState += 1;
+        Debug.Log($"Goto next state {CurrentState}");
         onStateChange?.Invoke(CurrentState);
     }
     public static void Back()
@@ -21,14 +22,14 @@ public static class GameStateManager
     }
     public static void GameEnd()
     {
-        CurrentState = GameState.Waiting;
+        CurrentState = GameState.Preparing;
         onStateChange?.Invoke(CurrentState);
     }
 }
 public enum GameState
 {
     Connecting,
-    Waiting,
+    Preparing,
     FindingMatch,
     Playing,
     ShowingResult,

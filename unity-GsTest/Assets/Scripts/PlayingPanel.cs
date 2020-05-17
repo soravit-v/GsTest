@@ -19,12 +19,16 @@ public class PlayingPanel : MonoBehaviour
                 panel.SetActive(true);
                 attributesDisplay.Init(PhotonMatchMaker.Instance.myPlayer.GetComponent<PlayerAttributes>(), false);
                 Cursor.visible = false;
-                Cursor.lockState = CursorLockMode.Locked;
+                Cursor.lockState = CursorLockMode.Confined;
+                break;
+            case GameState.ShowingResult:
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
                 break;
             default:
                 panel.SetActive(false);
                 Cursor.visible = true;
-                Cursor.lockState = CursorLockMode.Confined;
+                Cursor.lockState = CursorLockMode.None;
                 break;
         }
     }

@@ -14,6 +14,7 @@ public class PhotonMatchMaker : MonoBehaviourPunCallbacks
     private void Start()
     {
         Instance = this;
+        GameStateManager.onStateChange += OnStateChange;
         PhotonNetwork.ConnectUsingSettings();
     }
     public bool IsConnected => PhotonNetwork.IsConnectedAndReady;
@@ -61,5 +62,19 @@ public class PhotonMatchMaker : MonoBehaviourPunCallbacks
         var roomOption = new RoomOptions() { IsVisible = true, IsOpen = true, MaxPlayers = 12 };
         var typeLobby = new TypedLobby(roomName, LobbyType.Default);
         PhotonNetwork.JoinOrCreateRoom(roomName, roomOption, typeLobby);
+    }
+    public void LeaveRoom()
+    {
+        if (PhotonNetwork.IsConnected && PhotonNetwork.NetworkingClient.Server != ServerConnection.MasterServer)
+            PhotonNetwork.LeaveRoom();
+    }
+    void OnStateChange(GameState state)
+    {
+        switch (state)
+        {
+            case GameState.Preparing:
+                LeaveRoom();
+                break;
+        }
     }
 }

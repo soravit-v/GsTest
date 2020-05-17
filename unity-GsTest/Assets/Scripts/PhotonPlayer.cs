@@ -112,6 +112,8 @@ public class PhotonPlayer : MonoBehaviourPun, IPunObservable
         rigidbody.isKinematic = true;
         collider.enabled = false;
         photonAnimator.photonView.RPC("SetTrigger", RpcTarget.All, "Die");
+        if (photonView.IsMine)
+            GameStateManager.Next();
     }
     #endregion
 }
