@@ -1,14 +1,8 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
+﻿using UnityEngine;
 public class EquipmentPanel : MonoBehaviour
 {
     public InventoryItemButton meleeWeaponButton;
     public InventoryItemButton rangeWeaponButton;
-
-
     void Start()
     {
         var inventory = PlayerData.Get<PlayerInventory>();

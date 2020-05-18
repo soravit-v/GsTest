@@ -22,7 +22,7 @@ public class PlayfabLogin : MonoBehaviour
         loginButton.onClick.AddListener(Login);
         customIdInputField.text = PlayerPrefs.GetString("customId");
         OnStateChange(GameStateManager.CurrentState);
-        GameStateManager.onStateChange += OnStateChange;
+        GameStateManager.Subscribe(OnStateChange);
     }
     public void Login()
     {
@@ -47,7 +47,7 @@ public class PlayfabLogin : MonoBehaviour
         loginButton.interactable = false;
         onLoginSuccess?.Invoke();
     }
-    
+
 
     private void RequestPhotonToken(LoginResult obj)
     {

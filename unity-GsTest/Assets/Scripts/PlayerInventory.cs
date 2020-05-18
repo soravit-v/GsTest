@@ -144,6 +144,7 @@ public class PlayerInventory : IPlayfabData
     }
     private void Log(string message)
     {
-        
+        if (isLogging)
+            Debug.Log(message);
     }
 }

@@ -26,7 +26,6 @@ public class Hitbox : MonoBehaviourPun
     {
         this.ownerObject = ownerObject;
     }
-
     public void SetActiveTime(float spawnDelay, float lifeTime)
     {
         StartCoroutine(SetActiveTimeCoroutine(spawnDelay, lifeTime));
@@ -37,7 +36,7 @@ public class Hitbox : MonoBehaviourPun
         yield return new WaitForSeconds(spawnDelay);
         collider.enabled = true;
         yield return new WaitForSeconds(lifeTime);
-        Destroy(gameObject);
+        PhotonNetwork.Destroy(gameObject);
     }
     public void SetDamageData(float damage)
     {

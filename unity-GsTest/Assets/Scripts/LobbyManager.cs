@@ -1,23 +1,24 @@
-﻿using PlayFab.ClientModels;
+﻿using Photon.Realtime;
+using PlayFab.ClientModels;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using Zenject;
 
 public class LobbyManager : MonoBehaviour
 {
+    [Inject]
+    IMatchMaker matchMaker;
     public GameObject panel;
-    public PhotonMatchMaker matchMaker;
-    public Button gameMode1Button;
-    public Button gameMode2Button;
+    public Button startMatchingButton;
     public EquippedInventory equippedInventory;
     public AlertPopup popup;
     void Start()
     {
         OnStateChange(GameStateManager.CurrentState);
-        GameStateManager.onStateChange += OnStateChange;
-        gameMode1Button.onClick.AddListener(FindDeathMatch);
-        gameMode2Button.onClick.AddListener(FindTeamMatch);
+        GameStateManager.Subscribe(OnStateChange);
+        startMatchingButton.onClick.AddListener(FindDeathMatch);
     }
     private void OnStateChange(GameState state)
     {
@@ -49,7 +50,8 @@ public class LobbyManager : MonoBehaviour
             {
                 SetButtonInteractable(false);
                 GameStateManager.Next();
-                matchMaker.JoinOrCreateRoom("DeathMatch", OnJoinSuccess, OnJoinFailed);
+                var roomOption = new RoomOptions() { IsVisible = true, IsOpen = true, MaxPlayers = 12 };
+                matchMaker.JoinRoom("DeathMatch", roomOption, OnJoinSuccess, OnJoinFailed);
             }
             else
                 ShowPopup(error);
@@ -57,21 +59,10 @@ public class LobbyManager : MonoBehaviour
         else
             ShowPopup("Waiting for photon connection");
     }
-    private void FindTeamMatch()
-    {
-        if (matchMaker.IsConnected)
-        {
-            SetButtonInteractable(false);
-            GameStateManager.Next();
-            matchMaker.JoinOrCreateRoom("TeamMatch", OnJoinSuccess, OnJoinFailed);
-        }
-        else
-            ShowPopup("Waiting for photon connection");
-    }
     private void OnJoinSuccess()
     {
         var inventory = PlayerData.Get<PlayerInventory>();
-        var player = PhotonMatchMaker.Instance.myPlayer.GetComponent<PhotonPlayer>();
+        var player = matchMaker.PlayerObject.GetComponent<PhotonPlayer>();
         player.SetEquipment(inventory.MeleeWeapon, inventory.RangeWeapon);
         GameStateManager.Next();
     }
@@ -81,11 +72,9 @@ public class LobbyManager : MonoBehaviour
         GameStateManager.Back();
         SetButtonInteractable(true);
     }
-
     private void SetButtonInteractable(bool isInteractable)
     {
-        gameMode1Button.interactable = isInteractable;
-        gameMode2Button.interactable = isInteractable;
+        startMatchingButton.interactable = isInteractable;
     }
     #endregion
 }

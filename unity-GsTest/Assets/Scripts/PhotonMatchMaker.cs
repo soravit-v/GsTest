@@ -3,31 +3,27 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using Photon.Realtime;
+using System;
+using Zenject;
 
-public class PhotonMatchMaker : MonoBehaviourPunCallbacks
+public class PhotonMatchMaker : MonoBehaviourPunCallbacks, IMatchMaker
 {
-    public static PhotonMatchMaker Instance;
-    public GameObject myPlayer;
+    public GameObject PlayerObject { get; private set; }
     private System.Action onJoinedSuccess;
     private System.Action onJoinedFail;
     List<Player> players;
     private void Start()
     {
-        Instance = this;
-        GameStateManager.onStateChange += OnStateChange;
+        GameStateManager.Subscribe(OnStateChange);
         PhotonNetwork.ConnectUsingSettings();
     }
     public bool IsConnected => PhotonNetwork.IsConnectedAndReady;
+
+    public List<Player> Players => players;
+
     public override void OnConnectedToMaster()
     {
         Debug.Log($"OnConnect to master <{PhotonNetwork.LocalPlayer.UserId}>");
-    }
-
-    public void JoinRandomRoom(System.Action onSuccess, System.Action onFail)
-    {
-        onJoinedSuccess = onSuccess;
-        onJoinedFail = onFail;
-        PhotonNetwork.JoinRandomRoom();
     }
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
@@ -42,8 +38,15 @@ public class PhotonMatchMaker : MonoBehaviourPunCallbacks
             Debug.Log("Player " + player.UserId);
         var prefabPath = "Player";
         var spawnPoints = FindObjectOfType<SceneSpawnPoints>();
-        myPlayer = PhotonNetwork.Instantiate(prefabPath, spawnPoints.GetRandomSpawnPosition(), Quaternion.identity);
+        PlayerObject = PhotonNetwork.Instantiate(prefabPath, spawnPoints.GetRandomSpawnPosition(), Quaternion.identity);
         onJoinedSuccess?.Invoke();
+    }
+    public void JoinRoom(string roomName, RoomOptions roomOptions, Action onSuccess, Action onFail)
+    {
+        onJoinedSuccess = onSuccess;
+        onJoinedFail = onFail;
+        var typeLobby = new TypedLobby(roomName, LobbyType.Default);
+        PhotonNetwork.JoinOrCreateRoom(roomName, roomOptions, typeLobby);
     }
     public override void OnPlayerEnteredRoom(Player newPlayer)
     {

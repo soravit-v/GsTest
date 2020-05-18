@@ -81,7 +81,6 @@ public class PlayerAttributes : MonoBehaviourPun, IPunObservable, IPunInstantiat
         mp += timePassed * mpRecoverySpeed;
         mp = Mathf.Clamp(mp, 0, maxMp);
     }
-
     private void RecoverStamina(float timePassed)
     {
         stamina += timePassed * staminaRecoverySpeed;
@@ -102,7 +101,6 @@ public class PlayerAttributes : MonoBehaviourPun, IPunObservable, IPunInstantiat
             stamina = (float)stream.ReceiveNext();
         }
     }
-
     public void OnPhotonInstantiate(PhotonMessageInfo info)
     {
         SetMaxValue();
@@ -112,7 +110,6 @@ public class PlayerAttributes : MonoBehaviourPun, IPunObservable, IPunInstantiat
         }
         else
         {
-            PlayerAttributesPanel.Instance.AddOtherPlayerAttribute(this, photonView.Owner);
         }
     }
 }

@@ -10,8 +10,8 @@ public class ResultPanel : MonoBehaviour
     void Start()
     {
         OnStateChange(GameStateManager.CurrentState);
-        GameStateManager.onStateChange += OnStateChange;
-        nextStateButton.onClick.AddListener(()=> GameStateManager.GameEnd());
+        GameStateManager.Subscribe(OnStateChange);
+        nextStateButton.onClick.AddListener(() => GameStateManager.GameEnd());
     }
     void OnStateChange(GameState state)
     {

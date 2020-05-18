@@ -15,7 +15,6 @@ public class InventoryItemButton : MonoBehaviour
     {
         Initialize(itemInstance);
     }
-
     public void Initialize(ItemInstance itemInstance)
     {
         this.itemInstance = itemInstance;
@@ -61,7 +60,6 @@ public class InventoryItemButton : MonoBehaviour
             equippedPanel.SetActive(false);
             inventory.onEquippedItemChange -= UpdateEquippedStatus;
         }
-
     }
     public void EquipItem()
     {

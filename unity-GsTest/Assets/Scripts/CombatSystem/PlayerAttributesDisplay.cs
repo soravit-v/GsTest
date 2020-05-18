@@ -50,6 +50,5 @@ public class PlayerAttributesDisplay : MonoBehaviour
     {
         var screenPoint = Camera.main.WorldToScreenPoint(playerAttributes.transform.position);
         transform.position = screenPoint;
-        //transform.position = playerAttributes.transform.position;
     }
 }
